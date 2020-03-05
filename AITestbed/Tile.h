@@ -21,11 +21,11 @@ class Tile
         Vector2f Location;
         float FieldStrength;
         float FieldRange;
-
+        AABBf boundingBox;
         Vector2f LocalFieldValue;
 
-        Tile(TileType _type, const ImColor& _colour, const Vector2f& _location, float _fieldStrength, float _fieldRange) :
-            Type(_type), Colour(_colour), Location(_location), FieldStrength(_fieldStrength), FieldRange(_fieldRange)
+        Tile(TileType _type, const ImColor& _colour, const Vector2f& _location, float _fieldStrength, float _fieldRange, AABBf _boundingBox) :
+            Type(_type), Colour(_colour), Location(_location), FieldStrength(_fieldStrength), FieldRange(_fieldRange), boundingBox (_boundingBox)
         {
 
         }

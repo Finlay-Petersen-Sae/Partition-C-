@@ -55,10 +55,7 @@ Process (for using)
 	 - Run "Find potential relevant tiles" on that child and return the result
 */
 
-void Node::GenerateNode() 
-{
 
-}
 
 void TiledWorldGenerator::CalculateField()
 {
@@ -66,30 +63,35 @@ void TiledWorldGenerator::CalculateField()
 
 	// TODO: build tree here
 	Node* rootNode;
+	rootNode = new Node();
+	Vector2f size = Vector2f(Width, Length);
+	Vector2f centre = size / 2;
+	
+	AABBf box(Vector2f(0, 0), Vector2f(Width, Length));
+	rootNode->boundingBox = box;
+	for (Tile* currentTilePtr : world)
+	{
+		rootNode->AddTile(currentTilePtr);
+
+	}
 	// iterate over the tiles and calculate their field
 	for (Tile* currentTilePtr : world)
 	{
 		// reset the field
 		currentTilePtr->LocalFieldValue = Vector2f::Zero;
 
-		Vector2f boxSize = Vector2f(currentTilePtr->FieldRange, currentTilePtr->FieldRange);
-		AABBf boundingBox(currentTilePtr->Location - boxSize, 
-			              currentTilePtr->Location + boxSize);
-		rootNode->BoundingBox = boundingBox;
+
+		
 
 		// is this an obstacle? if so do nothing
 		if (currentTilePtr->Type == ettObstructed)
 			continue;
 
-		// TODO: "world" below changes to result we get back from asking for relevant tiles
-		for (Tile* nodeTileCheck : world) 
-		{
-			rootNode->Contents.push_back(nodeTileCheck);
+		 //TODO: "world" below changes to result we get back from asking for relevant tiles
 
-		}
-
+		auto objectfind = rootNode->FindObject(currentTilePtr);
 		// iterate over every other tile and add their contribution to the field
-		for(Tile* otherTilePtr : world)
+		for(Tile* otherTilePtr : objectfind)
 		{
 			// skip this tile
 			if (otherTilePtr == currentTilePtr)
@@ -132,7 +134,7 @@ void TiledWorldGenerator::DrawWorld()
 		// calculate the tile location
 		ImVec2 location = ImVec2((tilePtr->Location.X * cellSize) + startPoint.x, (tilePtr->Location.Y * cellSize) + startPoint.y);
 		ImColor workingColour = tilePtr->Colour;
-
+		
 		// add the cell bounds
 		//drawList->AddRect(location, ImVec2(location.x + cellSize, location.y + cellSize), 0xFFFFFFFF);
 
@@ -213,11 +215,12 @@ void TiledWorldGenerator::GenerateWorld()
 			}
 			if (!referenceTilePtr)
 				referenceTilePtr = TilePalette[rand() % TilePalette.size()];
-			 
+			Vector2f loc((float)lengthIndex, (float)widthIndex);
+			Vector2f extents(referenceTilePtr->FieldRange, referenceTilePtr->FieldRange);
 			// instantiate the new tile
-			world.push_back(new Tile(referenceTilePtr->Type, referenceTilePtr->Colour, 
-									 Vector2f((float)lengthIndex, (float)widthIndex), 
-									 referenceTilePtr->FieldStrength, referenceTilePtr->FieldRange));
+			world.push_back(new Tile(referenceTilePtr->Type, referenceTilePtr->Colour,
+			loc,referenceTilePtr->FieldStrength, referenceTilePtr->FieldRange,
+			AABBf(loc-extents,loc+extents)));
 		}
 	}
 }
